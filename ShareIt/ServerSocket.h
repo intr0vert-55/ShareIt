@@ -2,8 +2,8 @@
 #pragma once
 #include "Socket.h"
 #include <vector>
-
-class ServerSocket : public Socket{
+#include <memory>
+class ServerSocket : public Socket, std::enable_shared_from_this<ServerSocket> {
 	public :
 		int setup() override;
 		int receiveFile(int iterations, std::string fileName);

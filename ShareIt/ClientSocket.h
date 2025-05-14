@@ -4,7 +4,7 @@
 #include "FolderComponent.h"
 #include <vector>
 #include <memory>
-class ClientSocket : public Socket {
+class ClientSocket : public Socket, std::enable_shared_from_this<ClientSocket> {
 	public :
 		int setup() override;
 		bool sendChunk(std::vector<char> chunk);

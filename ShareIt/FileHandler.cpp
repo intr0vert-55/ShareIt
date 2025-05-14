@@ -8,21 +8,21 @@ std::queue<std::vector<char>> FileHandler::dataBuffer;
 bool FileHandler::eof = false;
 bool FileHandler::error = false;
 
-std::vector<std::string> FileHandler::getFiles(std::string filePath) {
-	std::vector<std::string> files;
-	try {
-		for (const auto& entry : std::filesystem::directory_iterator(filePath)) {
-			if (entry.is_regular_file()) {
-				files.push_back(entry.path().filename().string());
-			} else if (std::filesystem::is_directory(entry.status())) {
-				
-			}
-		}
-	} catch (std::filesystem::filesystem_error& e) {
-		std::cout << "Something went wrong in getting the files." << std::endl;
-	}
-	return files;
-}
+//std::vector<std::string> FileHandler::getFiles(std::string filePath) {
+//	std::vector<std::string> files;
+//	try {
+//		for (const auto& entry : std::filesystem::directory_iterator(filePath)) {
+//			if (entry.is_regular_file()) {
+//				files.push_back(entry.path().filename().string());
+//			} else if (std::filesystem::is_directory(entry.status())) {
+//				
+//			}
+//		}
+//	} catch (std::filesystem::filesystem_error& e) {
+//		std::cout << "Something went wrong in getting the files." << std::endl;
+//	}
+//	return files;
+//}
 
 // update
 
@@ -46,7 +46,7 @@ std::vector<std::shared_ptr<Component>> FileHandler::getComponents(std::shared_p
 	return components;
 }
 
-int FileHandler::sendFile(std::string fileName, ClientSocket* socket) {
+int FileHandler::sendFile(std::string fileName, std::shared_ptr<ClientSocket> socket) {
 	eof = false;
 	error = false;
 	std::cout << fileName << std::endl;
@@ -59,7 +59,7 @@ int FileHandler::sendFile(std::string fileName, ClientSocket* socket) {
 	return error ? 1 : 0;
 }
 
-void FileHandler::pushFileToQueue(std::string fileName, ClientSocket *socket) {
+void FileHandler::pushFileToQueue(std::string fileName, std::shared_ptr<ClientSocket> socket) {
 
 	std::ifstream file(fileName, std::ios::binary);
 	if (!file) {
@@ -87,7 +87,7 @@ void FileHandler::pushFileToQueue(std::string fileName, ClientSocket *socket) {
 	cv.notify_one();
 }
 
-void FileHandler::sendFileFromQueue(ClientSocket* socket) {
+void FileHandler::sendFileFromQueue(std::shared_ptr<ClientSocket> socket) {
 	while (true) {
 		std::unique_lock<std::mutex> lock(mtx);
 		if (error) {
@@ -105,7 +105,7 @@ void FileHandler::sendFileFromQueue(ClientSocket* socket) {
 	std::cout << "File sent successfully!" << std::endl;
 }
 
-int FileHandler::writeFile(int iterationCount, ServerSocket* socket, std::string filePath) {
+int FileHandler::writeFile(int iterationCount, std::shared_ptr<ServerSocket> socket, std::string filePath) {
 	std::thread receiveThread(receiveFiles, iterationCount, socket);
 	std::thread writeThread(writeFileFromBuffer, filePath);
 
@@ -115,7 +115,7 @@ int FileHandler::writeFile(int iterationCount, ServerSocket* socket, std::string
 	return 0;
 }
 
-void FileHandler::receiveFiles(int iterationCount, ServerSocket* socket) {
+void FileHandler::receiveFiles(int iterationCount, std::shared_ptr<ServerSocket> socket) {
 	while (iterationCount-- > 0) 
 	{
 		std::unique_lock<std::mutex> lock(mtx);

@@ -164,7 +164,7 @@ bool ClientSocket::sendRequest(std::string fileName) {
 }
 
 int ClientSocket::shareFile(std::string file) {
-	return FileHandler::sendFile(file, this);
+	return FileHandler::sendFile(file, shared_from_this());
 }
 
 int ClientSocket::sendIterationCount(int count) {

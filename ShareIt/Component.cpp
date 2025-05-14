@@ -5,7 +5,7 @@ Component::Component(std::string componentName, std::shared_ptr<Component> prevC
 	: componentName(componentName), prevComponent(prevComponent) {}
 
 
-std::string Component::getPath() {	// Not working as expected when we share this as file
+std::string Component::getPath() {	
 	if (path == "") {
 		path = "/";		// default or root path
 		std::shared_ptr<Component> parentComponent = prevComponent;

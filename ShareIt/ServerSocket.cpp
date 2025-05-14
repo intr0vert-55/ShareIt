@@ -70,7 +70,7 @@ bool ServerSocket::handshake() {
 
 int ServerSocket::receiveFile(int iterationCount, std::string fileName) {
 	std::string file = getFilePath() + "/" + fileName;
-	int fileWritingRes = FileHandler::writeFile(iterationCount, this, file);
+	int fileWritingRes = FileHandler::writeFile(iterationCount, shared_from_this(), file);
 	if (fileWritingRes == 1) {
 		return fileWritingRes;
 	}

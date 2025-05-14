@@ -1,2 +1,9 @@
-﻿  ClientSocket.cpp
+﻿  FileHandler.cpp
+C:\Users\vembudev\source\repos\ShareIt\ShareIt\FileHandler.cpp(43,44): warning C4101: 'e': unreferenced local variable
+C:\Users\vembudev\source\repos\ShareIt\ShareIt\FileHandler.cpp(72,36): warning C4244: 'initializing': conversion from 'std::streamoff' to 'size_t', possible loss of data
+C:\Users\vembudev\source\repos\ShareIt\ShareIt\FileHandler.cpp(72,24): warning C4244: 'initializing': conversion from 'std::streamoff' to 'const size_t', possible loss of data
+  FolderComponent.cpp
+C:\Users\vembudev\source\repos\ShareIt\ShareIt\FolderComponent.cpp(11,20): warning C4018: '<': signed/unsigned mismatch
+  SocketFactory.cpp
+  Generating Code...
   ShareIt.vcxproj -> C:\Users\vembudev\source\repos\ShareIt\Debug\ShareIt.exe
