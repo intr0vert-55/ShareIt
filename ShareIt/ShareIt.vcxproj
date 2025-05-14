@@ -141,18 +141,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ClientSocket.cpp" />
+    <ClCompile Include="Component.cpp" />
+    <ClCompile Include="FileComponent.cpp" />
     <ClCompile Include="FileHandler.cpp" />
+    <ClCompile Include="FolderComponent.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="ShareIt.cpp" />
     <ClCompile Include="Socket.cpp" />
+    <ClCompile Include="SocketFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="FileComponent.h" />
     <ClInclude Include="FileHandler.h" />
+    <ClInclude Include="FolderComponent.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="Socket.h" />
+    <ClInclude Include="SocketType.h" />
+    <ClInclude Include="SocketFactory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

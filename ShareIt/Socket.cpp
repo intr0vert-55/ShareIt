@@ -11,45 +11,45 @@ void Socket::closeAndCleanup(SOCKET* socket1) {
 	WSACleanup();
 }
 
-int Socket::checkForError(SOCKET* socket1, SOCKET* socket2, int result, string message) {
+int Socket::checkForError(SOCKET* socket1, SOCKET* socket2, int result, std::string message) {
 	if (result == SOCKET_ERROR) {
-		cout << message << ". Error code : " << WSAGetLastError() << endl;
+		std::cout << message << ". Error code : " << WSAGetLastError() << std::endl;
 		closeAndCleanup(socket1, socket2);
 		return 1;
 	}
 	return 0;
 }
 
-int Socket::checkForError(SOCKET* socket1, int result, string message) {
+int Socket::checkForError(SOCKET* socket1, int result, std::string message) {
 	if (result == SOCKET_ERROR) {
-		cout << message << ". Error code : " << WSAGetLastError() << endl;
+		std::cout << message << ". Error code : " << WSAGetLastError() << std::endl;
 		closeAndCleanup(socket1);
 		return 1;
 	}
 	return 0;
 }
 
-int Socket::checkForError(SOCKET* socket1, SOCKET* socket2, string message) {
+int Socket::checkForError(SOCKET* socket1, SOCKET* socket2, std::string message) {
 	if (*socket2 == INVALID_SOCKET) {
-		cout << message << ". Error code : " << WSAGetLastError() << endl;
+		std::cout << message << ". Error code : " << WSAGetLastError() << std::endl;
 		closeAndCleanup(socket1);
 		return 1;
 	}
 	return 0;
 }
 
-int Socket::checkForError(SOCKET* socket1, string message) {
+int Socket::checkForError(SOCKET* socket1, std::string message) {
 	if (*socket1 == INVALID_SOCKET) {
-		cout << message << ". Error code : " << WSAGetLastError() << endl;
+		std::cout << message << ". Error code : " << WSAGetLastError() << std::endl;
 		WSACleanup();
 		return 1;
 	}
 	return 0;
 }
 
-int Socket::checkForError(int data, string message) {
+int Socket::checkForError(int data, std::string message) {
 	if (data != 0) {
-		cout << message << ". Error code : " << data << endl;
+		std::cout << message << ". Error code : " << data << std::endl;
 		return 1;
 	}
 	return 0;
@@ -72,7 +72,7 @@ int Socket::prepareSocket() {
 	return createSocket();
 }
 
-bool Socket::sendCharPtr(SOCKET* socket, const char* buffer, int bufferSize, string errorMessage) {
+bool Socket::sendCharPtr(SOCKET* socket, const char* buffer, int bufferSize, std::string errorMessage) {
 	int bytesSent = 0;
 	while (bytesSent < bufferSize) {
 		int sendResult = send(*socket, buffer + bytesSent, bufferSize - bytesSent, 0);
@@ -83,7 +83,7 @@ bool Socket::sendCharPtr(SOCKET* socket, const char* buffer, int bufferSize, str
 	return true;
 }
 
-bool Socket::sendCharPtr(SOCKET* socket1, SOCKET* socket2, const char* buffer, int bufferSize, string errorMessage) {
+bool Socket::sendCharPtr(SOCKET* socket1, SOCKET* socket2, const char* buffer, int bufferSize, std::string errorMessage) {
 	int bytesSent = 0;
 	while (bytesSent < bufferSize) {
 		int sendResult = send(*socket1, buffer + bytesSent, bufferSize - bytesSent, 0);		
@@ -94,7 +94,7 @@ bool Socket::sendCharPtr(SOCKET* socket1, SOCKET* socket2, const char* buffer, i
 	return true;
 }
 
-bool Socket::recvCharPtr(SOCKET* socket, char* buffer, int bufferSize, string errorMessage) {
+bool Socket::recvCharPtr(SOCKET* socket, char* buffer, int bufferSize, std::string errorMessage) {
 	int bytesRecv = 0;
 	while (bytesRecv < bufferSize) {
 		int recvResult = recv(*socket, buffer + bytesRecv, bufferSize - bytesRecv, 0);
@@ -105,7 +105,7 @@ bool Socket::recvCharPtr(SOCKET* socket, char* buffer, int bufferSize, string er
 	return true;
 }
 
-bool Socket::recvCharPtr(SOCKET* socket1, SOCKET* socket2, char* buffer, int bufferSize, string errorMessage) {
+bool Socket::recvCharPtr(SOCKET* socket1, SOCKET* socket2, char* buffer, int bufferSize, std::string errorMessage) {
 	int bytesRecv = 0;
 	while (bytesRecv < bufferSize) {
 		int recvResult = recv(*socket1, buffer + bytesRecv, bufferSize - bytesRecv, 0);	

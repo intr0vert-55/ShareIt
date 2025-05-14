@@ -10,7 +10,7 @@ int ServerSocket::setup() {
 	if (result == 1)	return result;
 	result = listenForClients();
 	if (result == 1)	return result;
-	cout << "Waiting for a client..." << endl;
+	std::cout << "Waiting for a client..." << std::endl;
 	result = acceptClient();
 	if (result == 1)	return result;
 
@@ -19,14 +19,14 @@ int ServerSocket::setup() {
 	while (true) {
 
 		if (!clientReady) {
-			cout << "Waiting for handshake..." << endl;
+			std::cout << "Waiting for handshake..." << std::endl;
 			clientReady = handshake();
 			continue;
 		}
 
-		cout << "Waiting to receive a file..." << endl;
+		std::cout << "Waiting to receive a file..." << std::endl;
 
-		string fileName;
+		std::string fileName;
 		bool permission = requestPermission(fileName);
 		if (permission == false) {
 			if (closeServer()) {
@@ -42,10 +42,10 @@ int ServerSocket::setup() {
 		int recFileResult = receiveFile(iterationCount, fileName);
 		if (recFileResult == 1)	return recFileResult;
 
-		cout << "File copied successfully!! (Happy noises)" << endl;
+		std::cout << "File copied successfully!! (Happy noises)" << std::endl;
 	}
 
-	cout << "Closing server...";
+	std::cout << "Closing server...";
 
 	closeAndCleanup(&tcpSocket, &clientSocket);
 
@@ -53,23 +53,23 @@ int ServerSocket::setup() {
 }
 
 bool ServerSocket::handshake() {
-	string message = "READY";
+	std::string message = "READY";
 	const int msgSize = 5;
 	bool sendResult = sendCharPtr(&clientSocket, &tcpSocket, message.c_str(), msgSize, "Error in sending handshake");
 	if (!sendResult) {
 		return sendResult;
 	}
-	vector<char> messageBuff(msgSize);
+	std::vector<char> messageBuff(msgSize);
 	bool recvResult = recvCharPtr(&clientSocket, &tcpSocket, messageBuff.data(), msgSize, "Error in receiving handshake");
 	if (!recvResult) {
 		return false;
 	}
-	string recMessage(messageBuff.begin(), messageBuff.end());
+	std::string recMessage(messageBuff.begin(), messageBuff.end());
 	return recMessage == message;
 }
 
-int ServerSocket::receiveFile(int iterationCount, string fileName) {
-	string file = getFilePath() + "/" + fileName;
+int ServerSocket::receiveFile(int iterationCount, std::string fileName) {
+	std::string file = getFilePath() + "/" + fileName;
 	int fileWritingRes = FileHandler::writeFile(iterationCount, this, file);
 	if (fileWritingRes == 1) {
 		return fileWritingRes;
@@ -103,12 +103,12 @@ int ServerSocket::acceptClient() {
 	return checkForError(&tcpSocket, &clientSocket, "Error in accepting a client");
 }
 
-string ServerSocket::getFilePath() 
+std::string ServerSocket::getFilePath() 
 {
 	return "../ServerFiles";
 }
 
-int ServerSocket::retrieveChunks(vector<char>* chunk) {
+int ServerSocket::retrieveChunks(std::vector<char>* chunk) {
 	int chunkSize;
 	bool recvChunkSize = recvCharPtr(&clientSocket, &tcpSocket, (char*) &chunkSize, sizeof(chunkSize), "Error in receiving chunk size");
 	if (!recvChunkSize) {
@@ -118,32 +118,32 @@ int ServerSocket::retrieveChunks(vector<char>* chunk) {
 	return recvCharPtr(&clientSocket, &tcpSocket, chunk->data(), chunkSize, "Error in receiving chunk");
 }
 
-bool ServerSocket::requestPermission(string& fileName) {
+bool ServerSocket::requestPermission(std::string& fileName) {
 	int msgSize;
 	int receiveMsgSize = recv(clientSocket, (char*) &msgSize, sizeof(msgSize), 0);
-	vector<char> messageBuff(msgSize);
+	std::vector<char> messageBuff(msgSize);
 	bool recvMessage = recvCharPtr(&clientSocket, &tcpSocket, messageBuff.data(), msgSize, "Error in receiving request message");
 	if (!recvMessage)	return false;
-	string message(messageBuff.begin(), messageBuff.end());
-	cout << message << endl;
-	cout << "Want to receive? (Y/N) : ";
-	string response;
-	cin >> response;
+	std::string message(messageBuff.begin(), messageBuff.end());
+	std::cout << message << std::endl;
+	std::cout << "Want to receive? (Y/N) : ";
+	std::string response;
+	std::cin >> response;
 	if (toupper(response[0]) != 'Y') {
-		string responseMessage = "NO";
+		std::string responseMessage = "NO";
 		bool denyFileShare = sendCharPtr(&clientSocket, &tcpSocket, responseMessage.c_str(), responseMessage.size(), "Error in sending response");
 		return false;
 	}
-	string responseMessage = "OK";
-	string file = message;
+	std::string responseMessage = "OK";
+	std::string file = message;
 	fileName = file.substr(21);
 	return sendCharPtr(&clientSocket, &tcpSocket, responseMessage.c_str(), responseMessage.size(), "Error in sending response");
 }
 
 bool ServerSocket::closeServer() {
-	string response;
-	cout << "Do you want to close the server? (Y/N) : ";
-	cin >> response;
+	std::string response;
+	std::cout << "Do you want to close the server? (Y/N) : ";
+	std::cin >> response;
 
 	return toupper(response[0]) != 'N';
 }

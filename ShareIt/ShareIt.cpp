@@ -3,8 +3,11 @@
 #include "Socket.h"
 #include "ClientSocket.h"
 #include "ServerSocket.h"
+#include "SocketFactory.h"
+#include "SocketType.h"
+#include <memory>
 
-int parseOption(string option) {
+int parseOption(std::string option) {
 	int result = 0;
 	for (char ch : option) {
 		if (!isdigit(ch)) {
@@ -17,24 +20,24 @@ int parseOption(string option) {
 
 int main() {
 
-	while (true) 
-	{
-		Socket* socket = NULL;
-		string option;
-		cout << "1. Server -> Receive Files" << endl;
-		cout << "2. Client -> Send Files" << endl;
-		cout << "Enter an option : ";
-		cin >> option;
+
+	while (true) {
+		std::unique_ptr<Socket> socket = nullptr;
+		std::string option;
+		std::cout << "1. Server -> Receive Files" << std::endl;
+		std::cout << "2. Client -> Send Files" << std::endl;
+		std::cout << "Enter an option : ";
+		std::cin >> option;
 		int parsedOption = parseOption(option);
 		switch (parsedOption) {
 			case 1:
-				socket = new ServerSocket();
+				socket = SocketFactory::getSocket(SocketType::SERVER);
 				break;
 			case 2:
-				socket = new ClientSocket();
+				socket = SocketFactory::getSocket(SocketType::CLIENT);
 				break;
 			default:
-				cout << "Invalid option" << endl;
+				std::cout << "Invalid option" << std::endl;
 				continue;
 		}
 		socket->setup();

@@ -6,15 +6,15 @@
 class ServerSocket : public Socket{
 	public :
 		int setup() override;
-		int receiveFile(int iterations, string fileName);
-		int retrieveChunks(vector<char>* chunk);
+		int receiveFile(int iterations, std::string fileName);
+		int retrieveChunks(std::vector<char>* chunk);
 	private :
 		SOCKET clientSocket;	// client socket
 		int bindPort();
 		int listenForClients();
 		int acceptClient();
-		string getFilePath() override;
-		bool requestPermission(string& fileName);
+		std::string getFilePath() override;
+		bool requestPermission(std::string& fileName);
 		bool closeServer();
 		int getIterationCount(int& iterationCount);
 		bool handshake();

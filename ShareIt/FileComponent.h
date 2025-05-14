@@ -2,7 +2,6 @@
 #include "Component.h"
 class FileComponent : public Component {
 	public :
-		FileComponent();
-		string getPath() override;
-		~FileComponent() override;
+		FileComponent(std::string componentName, std::shared_ptr<Component> prevComponent);
+		std::shared_ptr<Component> getComponent() override;
 };

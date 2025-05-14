@@ -1,20 +1,22 @@
 #pragma once
 #include "Socket.h"
+#include "Component.h"
+#include "FolderComponent.h"
 #include <vector>
-
+#include <memory>
 class ClientSocket : public Socket {
 	public :
 		int setup() override;
-		bool sendChunk(vector<char> chunk);
+		bool sendChunk(std::vector<char> chunk);
 		int sendIterationCount(int count);
 	private :
 		int bindPort();
-		int connectToServer(string serverAddr);
-		string getFilePath() override;
-		int parseOption(string option);
-		int sendFile(string filename);
-		bool sendRequest(string filename);	// helper methods for sendFile (send & sendRequest)
-		int shareFile(string filename);
+		int connectToServer(std::string serverAddr);
+		std::string getFilePath() override;
+		int parseOption(std::string option);
+		int sendFile(std::shared_ptr<Component> component);
+		bool sendRequest(std::string filename);	// helper methods for sendFile (send & sendRequest)
+		int shareFile(std::string filename);
 		bool handshake();
-		int getOption(vector<string> files);
+		int getOption(std::vector<std::string> files);
 };

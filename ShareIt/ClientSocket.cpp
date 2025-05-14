@@ -15,30 +15,43 @@ int ClientSocket::setup() {
 
 	// Gotta write methods to get all the files, display it, send it and an exit option!
 
-	vector<string> files = FileHandler::getFiles(getFilePath());
+	//std::vector<std::string> files = FileHandler::getFiles(getFilePath());
+
+	std::shared_ptr<Component> component = std::make_shared<FolderComponent>("", std::shared_ptr<Component>());
 
 	bool readyToShare = false;
 
 	while (true) {
 		
 		while (!readyToShare) {
-			cout << "Waiting for handshake..." << endl;
+			std::cout << "Waiting for handshake..." << std::endl;
 			readyToShare = handshake();
 		}
 
-		int option = getOption(files);
+		/*int option = getOption(files);
 
 
 		if (option == -1 || (option > files.size())) {
-			cout << "Enter a valid number or 0 to exit!" << endl;
+			std::cout << "Enter a valid number or 0 to exit!" << std::endl;
 			continue;
 		}
 		if (option == 0) {
-			cout << "Closing everything and exiting...";
+			std::cout << "Closing everything and exiting...";
 			break;
 		}
 
-		int result = sendFile(files[option - 1]);
+		int result = sendFile(files[option - 1]);*/
+
+		std::shared_ptr<Component> currentComponent = component->getComponent();
+
+		if (currentComponent == nullptr) {
+			std::cout << "Closing everything and exiting....";
+			break;
+		}
+
+		sendFile(currentComponent);
+
+		component = currentComponent->prevComponent;
 	}
 
 	closeAndCleanup(&tcpSocket);
@@ -46,28 +59,28 @@ int ClientSocket::setup() {
 	return 0;
 }
 
-int ClientSocket::getOption(vector<string> files) {
-	cout << "Displaying all files..." << endl;
+int ClientSocket::getOption(std::vector<std::string> files) {
+	std::cout << "Displaying all files..." << std::endl;
 	int index = 1;
-	for (string file : files) {
-		cout << index++ << ". " << file << endl;
+	for (std::string file : files) {
+		std::cout << index++ << ". " << file << std::endl;
 	}
-	cout << "0. Exit" << endl;
-	cout << "Enter the number of the file : ";
-	string option;
-	cin >> option;
+	std::cout << "0. Exit" << std::endl;
+	std::cout << "Enter the number of the file : ";
+	std::string option;
+	std::cin >> option;
 
 	return parseOption(option);
 }
 
 bool ClientSocket::handshake() {
 	const int msgSize = 5;
-	vector<char> messageBuff(msgSize);
+	std::vector<char> messageBuff(msgSize);
 	bool recvResult = recvCharPtr(&tcpSocket, messageBuff.data(), msgSize, "Error in receiving handshake");
 	if (!recvResult) {
 		return recvResult;
 	}
-	string message(messageBuff.begin(), messageBuff.end());
+	std::string message(messageBuff.begin(), messageBuff.end());
 	if (message != "READY") {
 		return false;
 	}
@@ -85,25 +98,25 @@ int ClientSocket::bindPort() {	// Optional and might cause problems
 	return checkForError(&tcpSocket, bindResult,  "Error in binding the client");
 }
 
-int ClientSocket::connectToServer(string serverAddr) {
+int ClientSocket::connectToServer(std::string serverAddr) {
 	sockaddr_in serverAddress{};
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(12345);
 
 	int setupServerAddress = inet_pton(AF_INET, serverAddr.c_str(), &serverAddress.sin_addr);
 	if (setupServerAddress < 1) {
-		cout << "Error in setting server address" << endl;
+		std::cout << "Error in setting server address" << std::endl;
 		return 1;	// returning on failure
 	}
 	int result = connect(tcpSocket, (sockaddr*) &serverAddress, sizeof(serverAddress));
 	return checkForError(&tcpSocket, result, "Error in connecting with the server");
 }
 
-string ClientSocket::getFilePath() {
+std::string ClientSocket::getFilePath() {
 	return "../ClientFiles";
 }
 
-int ClientSocket::parseOption(string option) {
+int ClientSocket::parseOption(std::string option) {
 	int result = 0;
 	for (char ch : option) {
 		if (!isdigit(ch)) {
@@ -115,40 +128,50 @@ int ClientSocket::parseOption(string option) {
 }
 
 
-int ClientSocket::sendFile(string fileName) {
+/*int ClientSocket::sendFile(std::string fileName) {
 	boolean serverResponse = sendRequest(fileName);
-	cout << "Waiting for server's permission..." << endl;
+	std::cout << "Waiting for server's permission..." << std::endl;
 	if (!serverResponse) {
-		cout << "Server denied the file share request" << endl;
+		std::cout << "Server denied the file share request" << std::endl;
 		return 1;
 	}
 	return shareFile(fileName);
+}*/
+
+int ClientSocket::sendFile(std::shared_ptr<Component> component) {
+	std::string fileName = component->componentName;
+	boolean serverResponse = sendRequest(fileName);
+	if (!serverResponse) {
+		std::cout << "Server denied the file share request" << std::endl;
+		return 1;
+	}
+	return shareFile(component->getPath());
 }
 
-bool ClientSocket::sendRequest(string fileName) {
-	string message = "FILE SHARE REQUEST : " + fileName;
+bool ClientSocket::sendRequest(std::string fileName) {
+	std::string message = "FILE SHARE REQUEST : " + fileName;
 	int msgSize = message.size();
 	bool sendMsgSize = sendCharPtr(&tcpSocket, (char*) &msgSize, sizeof(msgSize), "Error in sending request size");
 	if (!sendMsgSize)	return false;
 	bool sendMsg = sendCharPtr(&tcpSocket, message.c_str(), msgSize, "Error in sending request");
 	if (!sendMsg)	return false;
 	int responseSize = 2;		// OK or NO
-	vector<char> responseBuff(responseSize);
+	std::vector<char> responseBuff(responseSize);
 	bool responseResult = recvCharPtr(&tcpSocket, responseBuff.data(), responseSize, "Error in getting response from the server");
 	if (!responseResult)	return false;
-	string response(responseBuff.begin(), responseBuff.end());
+	std::string response(responseBuff.begin(), responseBuff.end());
 	return response == "OK";
 }
 
-int ClientSocket::shareFile(string fileName) {
-	return FileHandler::sendFile(getFilePath() + "/" + fileName, this);
+int ClientSocket::shareFile(std::string file) {
+	return FileHandler::sendFile(file, this);
 }
 
 int ClientSocket::sendIterationCount(int count) {
 	return sendCharPtr(&tcpSocket, (char*)&count, sizeof(count), "Error in sending iteration count") ? 0 : 1;
 }
 
-bool ClientSocket::sendChunk(vector<char> chunk) {
+bool ClientSocket::sendChunk(std::vector<char> chunk) {
 	int size = chunk.size();
 	bool result = sendCharPtr(&tcpSocket, (char*) &size, sizeof(size), "Error in sending chunk size");
 	if (!result) {
