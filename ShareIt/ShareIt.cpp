@@ -22,7 +22,7 @@ int main() {
 
 
 	while (true) {
-		std::unique_ptr<Socket> socket = nullptr;
+		std::shared_ptr<Socket> socket = nullptr;
 		std::string option;
 		std::cout << "1. Server -> Receive Files" << std::endl;
 		std::cout << "2. Client -> Send Files" << std::endl;

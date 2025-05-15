@@ -6,5 +6,5 @@
 #include <memory>
 class SocketFactory {
 	public :
-		static std::unique_ptr<Socket> getSocket(SocketType socketType);
+		static std::shared_ptr<Socket> getSocket(SocketType socketType);
 };

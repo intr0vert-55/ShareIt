@@ -14,6 +14,17 @@ int ServerSocket::setup() {
 	result = acceptClient();
 	if (result == 1)	return result;
 
+	result = startReceivingFiles();
+	if (result == 1)	return result;
+
+	std::cout << "Closing server...";
+
+	closeAndCleanup(&tcpSocket, &clientSocket);
+
+	return 0;
+}
+
+int ServerSocket::startReceivingFiles() {
 	bool clientReady = false;
 
 	while (true) {
@@ -29,25 +40,25 @@ int ServerSocket::setup() {
 		std::string fileName;
 		bool permission = requestPermission(fileName);
 		if (permission == false) {
+			if (fileName == "EXIT_FLAG") {
+				std::cout << "Client has exited..." << std::endl;
+				break;		// could call acceptClient from here to let the server wait for another client
+			}
 			if (closeServer()) {
 				break;
 			}
 			continue;
 		}
-		
+
 		int iterationCount;
 		int iterationCountResult = getIterationCount(iterationCount);
 		if (iterationCountResult == 1)	return iterationCountResult;
-		
+
 		int recFileResult = receiveFile(iterationCount, fileName);
 		if (recFileResult == 1)	return recFileResult;
 
 		std::cout << "File copied successfully!! (Happy noises)" << std::endl;
 	}
-
-	std::cout << "Closing server...";
-
-	closeAndCleanup(&tcpSocket, &clientSocket);
 
 	return 0;
 }
@@ -70,7 +81,7 @@ bool ServerSocket::handshake() {
 
 int ServerSocket::receiveFile(int iterationCount, std::string fileName) {
 	std::string file = getFilePath() + "/" + fileName;
-	int fileWritingRes = FileHandler::writeFile(iterationCount, shared_from_this(), file);
+	int fileWritingRes = FileHandler::writeFile(iterationCount, this, file);
 	if (fileWritingRes == 1) {
 		return fileWritingRes;
 	}
@@ -125,6 +136,10 @@ bool ServerSocket::requestPermission(std::string& fileName) {
 	bool recvMessage = recvCharPtr(&clientSocket, &tcpSocket, messageBuff.data(), msgSize, "Error in receiving request message");
 	if (!recvMessage)	return false;
 	std::string message(messageBuff.begin(), messageBuff.end());
+	if (isExitMessage(message)) {
+		fileName = "EXIT_FLAG";
+		return false;
+	}
 	std::cout << message << std::endl;
 	std::cout << "Want to receive? (Y/N) : ";
 	std::string response;
@@ -138,6 +153,10 @@ bool ServerSocket::requestPermission(std::string& fileName) {
 	std::string file = message;
 	fileName = file.substr(21);
 	return sendCharPtr(&clientSocket, &tcpSocket, responseMessage.c_str(), responseMessage.size(), "Error in sending response");
+}
+
+bool ServerSocket::isExitMessage(std::string message) {
+	return message == "EXIT_FLAG";
 }
 
 bool ServerSocket::closeServer() {

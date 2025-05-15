@@ -2,8 +2,7 @@
 #pragma once
 #include "Socket.h"
 #include <vector>
-#include <memory>
-class ServerSocket : public Socket, std::enable_shared_from_this<ServerSocket> {
+class ServerSocket : public Socket {
 	public :
 		int setup() override;
 		int receiveFile(int iterations, std::string fileName);
@@ -13,8 +12,10 @@ class ServerSocket : public Socket, std::enable_shared_from_this<ServerSocket> {
 		int bindPort();
 		int listenForClients();
 		int acceptClient();
+		int startReceivingFiles();
 		std::string getFilePath() override;
 		bool requestPermission(std::string& fileName);
+		bool isExitMessage(std::string message);
 		bool closeServer();
 		int getIterationCount(int& iterationCount);
 		bool handshake();

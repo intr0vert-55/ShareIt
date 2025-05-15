@@ -6,45 +6,42 @@
 
 int ClientSocket::setup() {
 	int result;
+
 	result = prepareSocket();
-	if (result == 1)		return 1;
+	if (result == 1)	return result;
+
 	/*result = bindPort();				// Optional most probably will cause an error
 	if (result == 1)	return 1;*/
-	result = connectToServer("127.0.0.1");		// Default IP adress for loopback
-	if (result == 1)	return 1;
 
-	// Gotta write methods to get all the files, display it, send it and an exit option!
+	result = connectToServer("127.0.0.1");		// Default IP adress for loopback
+	if (result == 1)	return result;
 
 	//std::vector<std::string> files = FileHandler::getFiles(getFilePath());
 
+	result = startSendingFiles();
+	if (result == 1)	return result;
+
+	closeAndCleanup(&tcpSocket);
+
+	return 0;
+}
+
+int ClientSocket::startSendingFiles() {
 	std::shared_ptr<Component> component = std::make_shared<FolderComponent>("", std::shared_ptr<Component>());
 
 	bool readyToShare = false;
 
 	while (true) {
-		
+
 		while (!readyToShare) {
 			std::cout << "Waiting for handshake..." << std::endl;
 			readyToShare = handshake();
 		}
 
-		/*int option = getOption(files);
-
-
-		if (option == -1 || (option > files.size())) {
-			std::cout << "Enter a valid number or 0 to exit!" << std::endl;
-			continue;
-		}
-		if (option == 0) {
-			std::cout << "Closing everything and exiting...";
-			break;
-		}
-
-		int result = sendFile(files[option - 1]);*/
-
 		std::shared_ptr<Component> currentComponent = component->getComponent();
 
 		if (currentComponent == nullptr) {
+			sendExitFlag();
 			std::cout << "Closing everything and exiting....";
 			break;
 		}
@@ -54,9 +51,14 @@ int ClientSocket::setup() {
 		component = currentComponent->prevComponent;
 	}
 
-	closeAndCleanup(&tcpSocket);
-
 	return 0;
+}
+
+void ClientSocket::sendExitFlag() {
+	const int msgSize = 9;
+	const char* message = "EXIT_FLAG";
+	bool sendResult = sendCharPtr(&tcpSocket, (char*) &msgSize, sizeof(msgSize), "Error sending exit flag size");
+	sendResult = sendCharPtr(&tcpSocket, message, msgSize, "Error in sending exit flag");
 }
 
 int ClientSocket::getOption(std::vector<std::string> files) {
@@ -164,7 +166,7 @@ bool ClientSocket::sendRequest(std::string fileName) {
 }
 
 int ClientSocket::shareFile(std::string file) {
-	return FileHandler::sendFile(file, shared_from_this());
+	return FileHandler::sendFile(file, this);
 }
 
 int ClientSocket::sendIterationCount(int count) {

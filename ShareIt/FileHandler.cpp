@@ -46,10 +46,9 @@ std::vector<std::shared_ptr<Component>> FileHandler::getComponents(std::shared_p
 	return components;
 }
 
-int FileHandler::sendFile(std::string fileName, std::shared_ptr<ClientSocket> socket) {
+int FileHandler::sendFile(std::string fileName, ClientSocket* socket) {
 	eof = false;
 	error = false;
-	std::cout << fileName << std::endl;
 	std::thread pushThread(pushFileToQueue, fileName, socket);
 	std::thread sendThread(sendFileFromQueue, socket);
 
@@ -59,8 +58,8 @@ int FileHandler::sendFile(std::string fileName, std::shared_ptr<ClientSocket> so
 	return error ? 1 : 0;
 }
 
-void FileHandler::pushFileToQueue(std::string fileName, std::shared_ptr<ClientSocket> socket) {
-
+void FileHandler::pushFileToQueue(std::string fileName, ClientSocket* socket) {
+	std::cout << "Push file to q" << std::endl;
 	std::ifstream file(fileName, std::ios::binary);
 	if (!file) {
 		eof = true;
@@ -87,7 +86,7 @@ void FileHandler::pushFileToQueue(std::string fileName, std::shared_ptr<ClientSo
 	cv.notify_one();
 }
 
-void FileHandler::sendFileFromQueue(std::shared_ptr<ClientSocket> socket) {
+void FileHandler::sendFileFromQueue(ClientSocket* socket) {
 	while (true) {
 		std::unique_lock<std::mutex> lock(mtx);
 		if (error) {
@@ -105,7 +104,7 @@ void FileHandler::sendFileFromQueue(std::shared_ptr<ClientSocket> socket) {
 	std::cout << "File sent successfully!" << std::endl;
 }
 
-int FileHandler::writeFile(int iterationCount, std::shared_ptr<ServerSocket> socket, std::string filePath) {
+int FileHandler::writeFile(int iterationCount, ServerSocket* socket, std::string filePath) {
 	std::thread receiveThread(receiveFiles, iterationCount, socket);
 	std::thread writeThread(writeFileFromBuffer, filePath);
 
@@ -115,7 +114,7 @@ int FileHandler::writeFile(int iterationCount, std::shared_ptr<ServerSocket> soc
 	return 0;
 }
 
-void FileHandler::receiveFiles(int iterationCount, std::shared_ptr<ServerSocket> socket) {
+void FileHandler::receiveFiles(int iterationCount, ServerSocket* socket) {
 	while (iterationCount-- > 0) 
 	{
 		std::unique_lock<std::mutex> lock(mtx);
